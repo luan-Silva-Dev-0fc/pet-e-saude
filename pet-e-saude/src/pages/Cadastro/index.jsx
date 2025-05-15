@@ -2,7 +2,7 @@ export default function PageCadastro(){
     
 return(
 
-    <div className="">Cadastro</div>
+    <div className="">ola </div>
 )
 
 }
