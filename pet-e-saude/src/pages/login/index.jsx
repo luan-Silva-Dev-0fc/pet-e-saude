@@ -14,7 +14,7 @@ export default function Login() {
   };
 
   const handleSignup = () => {
-    router.push("/cadastro");
+    router.push("/Cadastro");
   };
 
   const handleRecover = () => {
