@@ -1,36 +1,47 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
   const router = useRouter();
-  
+
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("auth") === "true";
     if (isLoggedIn) {
       router.push("/");
     }
   }, [router]);
-  
+
   const handleGoogleLogin = () => {
     router.push("/login/google");
   };
-  
+
   const handleSignup = () => {
     router.push("/Cadastro");
   };
-  
+
   const handleRecover = () => {
     router.push("/recuperar-senha");
   };
-  
+
   const handleLogin = () => {
+    const email = document.getElementById("email")?.value;
+    const password = document.getElementById("password")?.value;
+
+    if (!email || !password) {
+      toast.error("E-mail e senha são obrigatórios.");
+      return;
+    }
+
     localStorage.setItem("auth", "true");
     router.push("/");
   };
-  
+
   return (
     <div className="flex min-h-screen bg-[#61a183] font-sans">
+      <ToastContainer />
       <div className="w-full md:w-1/2 bg-white px-8 md:px-12 py-16 flex flex-col justify-center shadow-2xl rounded-r-3xl">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           Acesse sua conta
