@@ -27,7 +27,7 @@ export default function AnimalDetail() {
     {
       id: 4,
       nome: 'Nina',
-      descricao: 'Cadela com uma pata , mas cheia de amor para dar.',
+      descricao: 'Cadela com uma pata traseira menor, mas cheia de amor para dar.',
       imagem: '/animais/animal4.jpeg',
     },
     {
@@ -38,7 +38,7 @@ export default function AnimalDetail() {
     },
     {
       id: 6,
-      nome: '',
+      nome: 'Suki',
       descricao: 'Cachorro com paralisia parcial, muito brincalhão e esperto.',
       imagem: '/animais/animal6.jpeg',
     },
