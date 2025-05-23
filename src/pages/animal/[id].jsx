@@ -32,8 +32,8 @@ export default function AnimalDetail() {
     },
     {
       id: 5,
-      nome: 'Thor',
-      descricao: 'Cachorro com deficiência nas patas traseiras, adora carinho.',
+      nome: 'jana',
+      descricao: 'gata Carinhosa Brincalhona',
       imagem: '/animais/animal5.jpg',
     },
     {

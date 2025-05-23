@@ -4,11 +4,12 @@ import { FcGoogle } from "react-icons/fc";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+
 export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("auth") === "true";
+    const isLoggedIn = localStorage.getItem("auth") === "false";
     if (isLoggedIn) {
       router.push("/");
     }

@@ -49,7 +49,7 @@ export default function DetalhesProduto() {
               </button>
             </Link>
 
-            {/* Avaliação */}
+            
             <div className="mt-6">
               <p className="font-semibold text-gray-700 mb-2">Avalie o produto:</p>
               <div className="flex items-center gap-1">

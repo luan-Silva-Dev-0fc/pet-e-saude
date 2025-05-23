@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { Menu, ArrowLeft } from 'lucide-react';
+import { BsArrowLeftCircle } from "react-icons/bs";
 
 export default function QuemSomos() {
   const router = useRouter();
@@ -56,16 +57,15 @@ export default function QuemSomos() {
 
       {menuOpen && (
         <div className="fixed top-0 left-0 h-full w-64 bg-gray-100 shadow-lg z-30 p-6 flex flex-col gap-4">
-          <button
+          <button 
             onClick={() => router.push('/login')}
             className="flex items-center gap-2 text-gray-800 hover:text-emerald-600"
           >
-            <ArrowLeft size={20} />
-            Voltar para Login
-          </button>
-          <button
+            <BsArrowLeftCircle  size={30} />  
+          </button >
+          <button 
             onClick={() => setMenuOpen(false)}
-            className="text-sm text-gray-600 hover:underline mt-auto"
+            className="text-sm text-black hover:underline mt-auto"
           >
             Fechar menu
           </button>
@@ -85,7 +85,7 @@ export default function QuemSomos() {
               />
             </form>
 
-            <nav className="space-x-6 text-gray-700 mb-8">
+            <nav className="space-x-20 text-gray-700 mb-8">
               <button onClick={() => router.push('/produtos')}>Produtos</button>
               <button onClick={() => router.push('/exames')}>Exames</button>
               <button onClick={() => router.push('/chat')}>Chat</button>
@@ -94,7 +94,7 @@ export default function QuemSomos() {
             </nav>
 
             <motion.h1
-              className="text-2xl font-semibold mb-4"
+              className="text-2x2 font-semibold mb-4"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
