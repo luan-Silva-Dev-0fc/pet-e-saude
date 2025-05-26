@@ -125,7 +125,7 @@ const PaymentPage = () => {
               <h3 className="text-gray-800 text-xl">QR Code do Pix</h3>
 
               <img
-                src="/qrcode-image.png"
+                src="/qr code.jpeg"
                 alt="QR Code do PIX"
                 className="w-full h-auto rounded-lg"
               />
