@@ -10,13 +10,18 @@
   },
   "dependencies": {
     "framer-motion": "^12.12.1",
+    "keen-slider": "^6.8.6",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
+    "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
+    "react-payment-inputs": "^1.2.0",
     "react-slick": "^0.30.3",
+    "react-svg-credit-card-payment-icons": "^3.1.1",
     "react-toastify": "^11.0.5",
+    "react-world-flags": "^1.6.0",
     "slick-carousel": "^1.8.1"
   },
   "devDependencies": {
