@@ -51,7 +51,7 @@ export default function QuemSomos() {
   return (
     <>
       <div className="absolute top-6 left-6 right-6 z-20 flex items-center justify-start">
-        <button onClick={() => setMenuOpen(!menuOpen)} className="mr-4">
+        <button onClick={() => setMenuOpen(prev => !prev)} className="mr-4">
           {menuOpen ? (
             <X size={28} className="text-gray-700" />
           ) : (
@@ -70,32 +70,26 @@ export default function QuemSomos() {
       </div>
 
       {menuOpen && (
-        <div className="fixed top-0 left-0 h-full w-64 bg-gray-100 shadow-lg z-30 p-6 flex flex-col gap-4">
-          <button
-            onClick={() => router.push("/login")}
-            className="flex items-center gap-2 text-gray-800 hover:text-emerald-600"
-          >
-            <BsArrowLeftCircle size={30} />
-          </button>
+        <div className="fixed top-0 left-0 h-full w-64 bg-gray-100 shadow-lg z-30 p-6 flex flex-col gap-2">
           <button
             onClick={() => setMenuOpen(false)}
-            className="text-sm text-black hover:underline mt-auto"
+            className="absolute top-4 right-4 text-gray-700"
           >
-            Fechar menu
+            <X size={28} />
           </button>
+          <button
+            onClick={() => router.push("/login")}
+            className="flex items-center gap-1 text-gray-800 hover:text-emerald-600"
+          >
+            <BsArrowLeftCircle size={30} />
+            <h1>Voltar</h1>
+          </button>
+
         </div>
       )}
 
       <div className="flex flex-col md:flex-row min-h-screen">
-        <div className="w-full md:hidden flex items-center justify-center bg-[#61a183] py-8">
-          <img
-            src="/logo da barra direita home.svg"
-            alt="Ilustração"
-            width={390}
-            height={390}
-            className="max-w-full h-auto"
-          />
-        </div>
+        <div className="w-full md:hidden flex items-center justify-center bg-[#ffffff] py-1"></div>
 
         <div className="w-full md:w-1/2 bg-white p-8 pt-20 flex flex-col justify-between">
           <div>
@@ -209,7 +203,7 @@ export default function QuemSomos() {
           </div>
         </div>
 
-        <div className="hidden md:flex w-full md:w-1/2 items-center justify-center bg-[#61a183] pt-16">
+        <div className="hidden md:flex w-full md:w-1/2 items-center justify-center bg-[#61a183] pt-2 pb-2">
           <img
             src="/logo da barra direita home.svg"
             alt="Ilustração"

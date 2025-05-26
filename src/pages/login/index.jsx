@@ -4,7 +4,6 @@ import { FcGoogle } from "react-icons/fc";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
 export default function Login() {
   const router = useRouter();
 
@@ -124,7 +123,7 @@ export default function Login() {
         </p>
       </div>
 
-      <div className="w-1/2 flex items-center justify-center bg-[#FFCC3A] md:bg-transparent">
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-[#61a183] md:bg-transparent">
         <img
           src="/veterinary-animate.svg"
           alt="Logo"
