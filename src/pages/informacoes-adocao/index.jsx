@@ -2,14 +2,37 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 export default function InformacoesAdocao() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    telefone: '',
+    cidade_estado: '',
+    motivo: '',
+    ambiente: '',
+  });
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Limitar telefone a 11 dígitos
+    if (name === 'telefone' && value.length > 11) return;
+
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setShowModal(true); 
+    try {
+      await axios.post('http://localhost:3001/adocao', formData); // ajuste a URL conforme seu backend
+      setShowModal(true);
+    } catch (error) {
+      console.error('Erro ao enviar dados:', error);
+    }
   };
 
   const closeModal = () => {
@@ -38,17 +61,56 @@ export default function InformacoesAdocao() {
         </motion.h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input type="text" placeholder="Nome completo" required className="border rounded-lg p-2" />
-          <input type="email" placeholder="E-mail para contato" required className="border rounded-lg p-2" />
-          <input type="tel" placeholder="Telefone" required className="border rounded-lg p-2" />
-          <input type="text" placeholder="Cidade e Estado" required className="border rounded-lg p-2" />
+          <input
+            name="nome"
+            value={formData.nome}
+            onChange={handleChange}
+            type="text"
+            placeholder="Nome completo"
+            required
+            className="border rounded-lg p-2"
+          />
+          <input
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            type="email"
+            placeholder="E-mail para contato"
+            required
+            className="border rounded-lg p-2"
+          />
+          <input
+            name="telefone"
+            value={formData.telefone}
+            onChange={handleChange}
+            type="tel"
+            placeholder="Telefone (somente números)"
+            required
+            pattern="[0-9]{10,11}"
+            className="border rounded-lg p-2"
+          />
+          <input
+            name="cidade_estado"
+            value={formData.cidade_estado}
+            onChange={handleChange}
+            type="text"
+            placeholder="Cidade e Estado"
+            required
+            className="border rounded-lg p-2"
+          />
           <textarea
+            name="motivo"
+            value={formData.motivo}
+            onChange={handleChange}
             placeholder="Por que você quer adotar esse animal?"
             rows={4}
             required
             className="border rounded-lg p-2 resize-none"
           />
           <textarea
+            name="ambiente"
+            value={formData.ambiente}
+            onChange={handleChange}
             placeholder="Como é o ambiente onde o animal irá viver?"
             rows={4}
             required
@@ -60,7 +122,6 @@ export default function InformacoesAdocao() {
         </form>
       </div>
 
-      
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <motion.div

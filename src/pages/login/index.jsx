@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
@@ -16,32 +17,46 @@ export default function Login() {
       router.push("/");
     }
   }, [router]);
-
+  
   const handleGoogleLogin = () => {
     router.push("/login/google");
   };
-
+  
   const handleSignup = () => {
     router.push("/Cadastro");
   };
-
+  
   const handleRecover = () => {
     router.push("/recuperar-senha");
   };
-
-  const handleLogin = () => {
+  
+  const handleLogin = async () => {
     const email = document.getElementById("email")?.value;
     const password = document.getElementById("password")?.value;
-
+    
     if (!email || !password) {
       toast.error("E-mail e senha são obrigatórios.");
       return;
     }
-
-    localStorage.setItem("auth", "true");
-    router.push("/");
+    
+    try {
+      const response = await axios.post("http://localhost:3001/login", {
+        email,
+        password,
+      });
+      
+      if (response.data.success) {
+        localStorage.setItem("auth", "true");
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        router.push("/");
+      } else {
+        toast.error(response.data.message || "Login falhou.");
+      }
+    } catch (error) {
+      toast.error("Erro ao conectar com o servidor.");
+    }
   };
-
+  
   return (
     <div className="flex min-h-screen bg-[#61a183] font-sans">
       <ToastContainer />
@@ -52,10 +67,7 @@ export default function Login() {
 
         <form className="space-y-6">
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               E-mail:
             </label>
             <div className="relative">
@@ -78,10 +90,7 @@ export default function Login() {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Senha:
             </label>
             <div className="relative">

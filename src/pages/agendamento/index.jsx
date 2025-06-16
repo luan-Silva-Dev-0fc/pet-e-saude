@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Head from "next/head";
+import axios from "axios";
 
 export default function Agendamento() {
   const [pet, setPet] = useState("");
@@ -9,16 +10,27 @@ export default function Agendamento() {
   const [telefone, setTelefone] = useState("");
   const [agendado, setAgendado] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(null); // "sucesso" ou "erro"
+  const [showModal, setShowModal] = useState(null);
 
-  const handleAgendar = () => {
+  const handleAgendar = async () => {
     if (pet && dataHora && tipoConsulta && nome && telefone) {
       setLoading(true);
-      setTimeout(() => {
+      try {
+        await axios.post("http://localhost:3001/agendamentos", {
+          pet,
+          dataHora,
+          tipoConsulta,
+          nome,
+          telefone,
+        });
         setAgendado(true);
-        setLoading(false);
         setShowModal("sucesso");
-      }, 1500);
+      } catch (error) {
+        console.error("Erro ao agendar:", error);
+        setShowModal("erro");
+      } finally {
+        setLoading(false);
+      }
     } else {
       setShowModal("erro");
     }
