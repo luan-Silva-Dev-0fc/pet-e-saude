@@ -1,7 +1,9 @@
 'use client'
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function PageCadastro() {
   const router = useRouter();
@@ -11,7 +13,7 @@ export default function PageCadastro() {
 
   const handleSignup = async () => {
     try {
-      await axios.post("http://localhost:3001/auth/register", {
+      await axios.post("http://localhost:4028/auth/register", {
         email,
         password
       });
