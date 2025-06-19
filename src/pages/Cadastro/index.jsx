@@ -1,163 +1,128 @@
-import { useState } from "react";
-import axios from "axios";
+'use client'
 import { useRouter } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-import { FiEye, FiEyeOff } from "react-icons/fi"; 
+import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function PageCadastro() {
   const router = useRouter();
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [confirmaSenha, setConfirmaSenha] = useState("");
-  const [senhaVisivel, setSenhaVisivel] = useState(false); 
-  const [confirmaSenhaVisivel, setConfirmaSenhaVisivel] = useState(false); 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignup = async () => {
-    if (senha !== confirmaSenha) {
-      toast.error("As senhas não coincidem.");
-      return;
-    }
-
-    if (nome.length > 255 || email.length > 255 || senha.length < 6) {
-      toast.error("Por favor, preencha os campos corretamente.");
-      return;
-    }
-
     try {
-      const response = await axios.post("coloque a api aqui", {
-        nome,
+      await axios.post("http://localhost:4028/auth/register", {
         email,
-        senha,
+        password
       });
-
-      if (response.status === 201) {
-        toast.success("Cadastro realizado com sucesso!");
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
-      }
+      toast.success("Cadastro realizado com sucesso!");
+      setTimeout(() => router.push("/login"), 2000);
     } catch (error) {
-      toast.error("Erro ao cadastrar. Tente novamente.");
+      toast.error("Erro ao cadastrar. Verifique os dados.");
     }
-  };
-
-  const tela = () => {
-    router.push("/login");
   };
 
   return (
-    <div className="flex min-h-screen bg-[#61a183] font-sans">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-      <div className="w-full md:w-1/2 bg-white px-8 md:px-12 py-16 flex flex-col justify-center shadow-2xl rounded-r-3xl mx-4 md:mx-0">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-          Crie sua conta
-        </h2>
+    <>
+      <ToastContainer />
+      <div className="flex min-h-screen bg-[#61a183] font-sans">
+        <div className="w-full md:w-1/2 bg-white px-8 md:px-12 py-16 flex flex-col justify-center shadow-2xl rounded-r-3xl mx-4 md:mx-0">
+          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+            Crie sua conta
+          </h2>
 
-        <form className="space-y-6">
-          <div>
-            <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
-              Nome
-            </label>
-            <input
-              id="nome"
-              type="text"
-              required
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-green-800"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              E-mail
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-green-800"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Senha
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={senhaVisivel ? "text" : "password"} 
-                required
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                className="my-3 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-green-800"
-              />
-              <button
-                type="button"
-                onClick={() => setSenhaVisivel(!senhaVisivel)}
-                className="absolute right-3 top-3"
-              >
-                {senhaVisivel ? <FiEyeOff className="text-gray-600" /> : <FiEye className="text-gray-600" />} 
-              </button>
+          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">E-mail</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  </svg>
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none  focus:border-black focus:z-10 sm:text-sm transition-colors"
+                  placeholder="Digite seu email"
+                />
+              </div>
             </div>
 
-            <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700">
-              Confirme sua senha
-            </label>
-            <div className="relative">
-              <input
-                id="confirm_password"
-                type={confirmaSenhaVisivel ? "text" : "password"} 
-                required
-                value={confirmaSenha}
-                onChange={(e) => setConfirmaSenha(e.target.value)}
-                className="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-green-800"
-              />
-              <button
-                type="button"
-                onClick={() => setConfirmaSenhaVisivel(!confirmaSenhaVisivel)}
-                className="absolute right-3 top-3"
-              >
-                {confirmaSenhaVisivel ? <FiEyeOff className="text-gray-600" /> : <FiEye className="text-gray-600" />}
-              </button>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Senha</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="appearance-none relative block mt-2 w-full pl-10 pr-12 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none  focus:border-black focus:z-10 sm:text-sm transition-colors"
+                  placeholder="Digite sua senha"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029..." />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12..." />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={handleSignup}
-            className="w-full bg-[#26885a] text-white font-bold py-3 px-4 rounded-xl transition duration-300 shadow-md"
-          >
-            Cadastrar
-          </button>
-
-          <div className="text-center">
-            <span className="text-sm text-gray-600">Já possui uma conta? </span>
             <button
-              type="button"
-              onClick={tela}
-              className="text-green-800 hover:underline text-sm font-semibold"
+              type="submit"
+              onClick={handleSignup}
+              className="w-full bg-[#26885a] text-white font-bold py-3 px-4 rounded-xl transition duration-300 shadow-md"
             >
-              Login
+              Cadastrar
             </button>
-          </div>
-        </form>
-      </div>
 
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-[#61a183] md:bg-transparent">
-        <img
-          src="/adopt-a-pet-animate.svg"
-          alt="Logo"
-          width={390}
-          height={390}
-          className="drop-shadow-lg"
-        />
+            <div className="text-center">
+              <span className="text-sm text-gray-600">já possui uma conta? </span>
+              <button
+                type="button"
+                onClick={() => router.push("/login")}
+                className="text-green-800 hover:underline text-sm font-semibold"
+              >
+                login
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div className="w-full md:w-1/2 flex items-center justify-center bg-[#61a183] md:bg-transparent">
+          <img
+            src="/adopt-a-pet-animate.svg"
+            alt="Logo"
+            width={390}
+            height={390}
+            className="drop-shadow-lg"
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
