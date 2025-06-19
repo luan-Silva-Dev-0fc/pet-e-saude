@@ -16,12 +16,13 @@ export default function Agendamento() {
     if (pet && dataHora && tipoConsulta && nome && telefone) {
       setLoading(true);
       try {
-        await axios.post("http://localhost:3001/agendamentos", {
+        await axios.post("http://localhost:4028/api/agendamentos", {
           pet,
           dataHora,
           tipoConsulta,
           nome,
           telefone,
+          ligadoAExame: tipoConsulta === "exame"
         });
         setAgendado(true);
         setShowModal("sucesso");

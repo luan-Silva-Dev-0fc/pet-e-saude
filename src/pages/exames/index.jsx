@@ -1,65 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, FileText, CheckCircle, Clock } from "lucide-react";
-import { useRouter } from "next/router"; // Importando useRouter
-
-const exames = [
-  {
-    id: 1,
-    nome: "Hemograma Completo",
-    dataSolicitacao: "2025-05-10",
-    dataExame: "2025-05-12",
-    status: "Realizado",
-    profissional: "Dra. Ana Paula Silva",
-    resultadoDisponivel: true,
-    animal: {
-      nome: "Toby",
-      especie: "Cachorro",
-      raca: "SRD",
-      idade: "4 anos",
-      sexo: "Macho",
-      foto: "/animais/animal1.jpg",
-    },
-    observacoes: "Jejum de 12h antes do exame.",
-  },
-  {
-    id: 2,
-    nome: "Raio-X do Tórax",
-    dataSolicitacao: "2025-05-15",
-    dataExame: "2025-05-20",
-    status: "Agendado",
-    profissional: "Dr. Carlos Mendes",
-    resultadoDisponivel: false,
-    animal: {
-      nome: "Luna",
-      especie: "Cadela",
-      raca: "Border Collie",
-      idade: "2 anos",
-      sexo: "Fêmea",
-      foto: "/animais/animal2.jpg",
-    },
-    observacoes: "Evitar alimentação 6h antes do exame.",
-  },
-  {
-    id: 3,
-    nome: "Glicemia em jejum",
-    dataSolicitacao: "2025-05-22",
-    dataExame: "2025-05-25",
-    status: "Pendente",
-    profissional: "Dra. Julia Nogueira",
-    resultadoDisponivel: false,
-    animal: {
-      nome: "Mel",
-      especie: "Cadela",
-      raca: "Maltês",
-      idade: "1 ano",
-      sexo: "Fêmea",
-      foto: "/animais/animal3.jpg",
-    },
-    observacoes: "Manter em jejum por 8h.",
-  },
-];
+import { useRouter } from "next/router";
+import axios from "axios";
 
 const statusIcon = {
   Realizado: <CheckCircle className="text-green-600" />,
@@ -68,10 +12,35 @@ const statusIcon = {
 };
 
 export default function InterfaceExames() {
-  const router = useRouter(); // Usando o hook useRouter
+  const router = useRouter();
+  const [exames, setExames] = useState([]);
+
+  useEffect(() => {
+    const fetchExames = async () => {
+      try {
+        const response = await axios.get("http://localhost:4028/api/exames");
+        const examesAdaptados = response.data.map((exame) => ({
+          ...exame,
+          animal: {
+            nome: exame.animalnome,
+            especie: "Desconhecida", // Substitua conforme necessário
+            raca: "Desconhecida", // Substitua conforme necessário
+            idade: "Desconhecida", // Substitua conforme necessário
+            sexo: "Desconhecido", // Substitua conforme necessário
+            foto: exame.animalfoto || "/default.jpg", // Usando a foto do animal ou a foto padrão
+          },
+        }));
+        setExames(examesAdaptados);
+      } catch (error) {
+        console.error("Erro ao buscar exames:", error);
+      }
+    };
+
+    fetchExames();
+  }, []);
 
   const handleVerResultado = (id) => {
-    router.push(`/resultado/${id}`); // Redireciona para a página de resultado
+    router.push(`/resultado/${id}`);
   };
 
   return (
@@ -84,7 +53,7 @@ export default function InterfaceExames() {
             className="rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition duration-300 bg-white"
           >
             <img
-              src={exame.animal.foto}
+              src={exame.animal.foto} // Aqui a imagem será carregada da URL fornecida ou a padrão
               alt={`Foto de ${exame.animal.nome}`}
               className="w-full h-48 object-cover rounded-t-2xl"
             />

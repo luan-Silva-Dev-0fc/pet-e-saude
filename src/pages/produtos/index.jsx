@@ -1,59 +1,22 @@
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import Link from "next/link";
 
-const produtos = [
-  {
-    nome: "Cadeira De 2 Rodas Cachorro Tamanho G Rogwheel Cão Pet",
-    preco: "R$ 150",
-    desconto: "39% OFF",
-    imagem: "/produtos/cadeira-rodas.jpg",
-  },
-  {
-    nome: "Shampoo Banho de Carinho Petz para Cães 500ml",
-    preco: "R$ 19,90",
-    desconto: "10% OFF",
-    imagem: "/produtos/MP23715892_1.jpg",
-  },
-  {
-    nome: "Bani 3 Pipeta Gatos Antipulgas, Vermes e Sarna Guarumo Até 2,5 Kg",
-    preco: "R$ 60,07",
-    desconto: "39% OFF",
-    imagem: "/produtos/ea9d6baa769159a00384636c64578fe64a3f5aa4.jpg",
-  },
-  {
-    nome: "Suplemento Avert Condroplex LB com 60 Comprimidos",
-    preco: "R$ 23,90",
-    desconto: "10% OFF",
-    imagem: "/produtos/condroplex-lb-60-comp-caes-avert-Principal.jpg",
-  },
-  {
-    nome: "Condroton Vetnil 500mg",
-    preco: "R$ 22,90",
-    desconto: "39% OFF",
-    imagem: "/produtos/condroplex-500-para-caes-Principal.jpg",
-  },
-  {
-    nome: "ADVOCATE GATOS - para gatos de 4kg até 8kg - pipeta com 0,8ml",
-    preco: "R$ 23,90",
-    desconto: "10% OFF",
-    imagem: "/produtos/1069914-368-368.jpg",
-  },
-  {
-    nome: "Credeli Antipulgas e Carrapatos para Gatos Elanco | Comprimido 12mg",
-    preco: "R$ 23,90",
-    desconto: "39% OFF",
-    imagem: "/produtos/172347-800-auto.jpg",
-  },
-  {
-    nome: "Remédio Anti Sarna Para Cachorro Gato E Coelho Saniran 30ml",
-    preco: "R$ 21,40",
-    desconto: "10% OFF",
-    imagem:
-      "/produtos/D_NQ_NP_957674-MLB75839205344_042024-O-remedio-anti-sarna-para-cachorro-gato-e-coelho-sarniran-30ml.jpg",
-  },
-];
-
 export default function Produtos() {
+  const [produtos, setProdutos] = useState([]);
+
+  useEffect(() => {
+    const fetchProdutos = async () => {
+      try {
+        const response = await axios.get("http://localhost:4028/api/produtos");
+        setProdutos(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar produtos:", error);
+      }
+    };
+    fetchProdutos();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 h-screen bg-gray-100">
       <div className="p-10 bg-white overflow-y-auto">
@@ -61,12 +24,12 @@ export default function Produtos() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {produtos.map((produto, index) => (
             <div key={index} className="bg-gray-100 p-4 rounded-xl shadow-md">
-              <Image
+              <img
                 src={produto.imagem}
                 alt={produto.nome}
                 width={200}
                 height={200}
-                className="mb-4 rounded-lg"
+                className="mb-4 rounded-lg object-cover"
               />
               <p className="text-sm text-green-600 font-semibold">
                 {produto.desconto}
@@ -86,7 +49,7 @@ export default function Produtos() {
         className="hidden md:flex items-center justify-center"
         style={{ backgroundColor: "#61a183" }}
       >
-        <Image
+        <img
           src="/cat-and-dog-animate.svg"
           alt="Imagem SVG"
           width={500}

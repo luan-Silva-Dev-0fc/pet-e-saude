@@ -1,170 +1,149 @@
 import { useRouter } from "next/router";
-import Image from "next/image";
-import { useState } from "react";
-import Link from "next/link";
-
-const produtos = [
-  {
-    nome: "Cadeira De 2 Rodas Cachorro Tamanho G Rogwheel Cão Pet",
-    preco: "R$ 150",
-    desconto: "39% OFF",
-    imagem: "/produtos/cadeira-rodas.jpg",
-  },
-  {
-    nome: "Shampoo Banho de Carinho Petz para Cães 500ml",
-    preco: "R$ 19,90",
-    desconto: "10% OFF",
-    imagem: "/produtos/MP23715892_1.jpg",
-  },
-  {
-    nome: "Bani 3 Pipeta Gatos Antipulgas, Vermes e Sarna Guarumo Até 2,5 Kg",
-    preco: "R$ 60,07",
-    desconto: "39% OFF",
-    imagem: "/produtos/ea9d6baa769159a00384636c64578fe64a3f5aa4.jpg",
-  },
-  {
-    nome: "Suplemento Avert Condroplex LB com 60 Comprimidos",
-    preco: "R$ 23,90",
-    desconto: "10% OFF",
-    imagem: "/produtos/condroplex-lb-60-comp-caes-avert-Principal.jpg",
-  },
-  {
-    nome: "Condroton Vetnil 500mg",
-    preco: "R$ 22,90",
-    desconto: "39% OFF",
-    imagem: "/produtos/condroplex-500-para-caes-Principal.jpg",
-  },
-  {
-    nome: "ADVOCATE GATOS - para gatos de 4kg até 8kg - pipeta com 0,8ml",
-    preco: "R$ 23,90",
-    desconto: "10% OFF",
-    imagem: "/produtos/1069914-368-368.jpg",
-  },
-  {
-    nome: "Credeli Antipulgas e Carrapatos para Gatos Elanco | Comprimido 12mg",
-    preco: "R$ 23,90",
-    desconto: "39% OFF",
-    imagem: "/produtos/172347-800-auto.jpg",
-  },
-  {
-    nome: "Remédio Anti Sarna Para Cachorro Gato E Coelho Saniran 30ml",
-    preco: "R$ 21,40",
-    desconto: "10% OFF",
-    imagem:
-      "/produtos/D_NQ_NP_957674-MLB75839205344_042024-O-remedio-anti-sarna-para-cachorro-gato-e-coelho-sarniran-30ml.jpg",
-  },
-];
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function DetalhesProduto() {
   const router = useRouter();
   const { id } = router.query;
-  const [estrelas, setEstrelas] = useState(0);
+
+  const [produto, setProduto] = useState(null);
+  const [comentarios, setComentarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [comentario, setComentario] = useState("");
+  const [estrela, setEstrela] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
-  if (!id || id >= produtos.length) {
-    return <p className="p-10">Produto não encontrado</p>;
-  }
+  useEffect(() => {
+    if (!id) return;
 
-  const produto = produtos[id];
+    const fetchProduto = async () => {
+      try {
+        const response = await axios.get(`http://localhost:4028/api/detalhes/${id}`);
+        setProduto(response.data);
+        if (response.data.comentarios) {
+          setComentarios(response.data.comentarios);
+        }
+      } catch (err) {
+        setError("Produto não encontrado.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduto();
+  }, [id]);
+
+  const handleComentarioSubmit = async () => {
+    if (comentario === "" || estrela === 0) {
+      setModalMessage("Por favor, avalie o produto e adicione um comentário.");
+      setModalOpen(true);
+      return;
+    }
+
+    try {
+      const response = await axios.post(`http://localhost:4028/api/avaliacoes/${id}`, {
+        comentario,
+        estrela,
+      });
+
+      setComentarios([...comentarios, { comentario, estrela }]);
+      setModalMessage("Comentário enviado com sucesso!");
+      setModalOpen(true);
+      setComentario("");
+      setEstrela(0);
+    } catch (err) {
+      setModalMessage("Erro ao enviar comentário. Tente novamente.");
+      setModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  if (loading) return <p>Carregando...</p>;
+  if (error) return <p>{error}</p>;
+  if (!produto) return <p>Produto não encontrado</p>;
 
   return (
     <div className="min-h-screen bg-[#61a183] py-10 px-6">
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
         <h1 className="text-3xl font-bold text-gray-800">{produto.nome}</h1>
         <div className="mt-6 flex flex-col md:flex-row gap-6">
-          <Image
+          <img
             src={produto.imagem}
             alt={produto.nome}
             width={300}
             height={300}
-            className="rounded-lg mx-auto"
+            className="rounded-lg mx-auto object-cover"
           />
           <div className="flex-1">
-            <p className="text-2xl font-semibold text-gray-900">
-              {produto.preco}
-            </p>
-            <p className="text-green-600 font-semibold mb-4">
-              {produto.desconto}
-            </p>
-            <p className="mb-4">
-              Aqui você pode colocar uma descrição mais detalhada sobre o
-              produto.
-            </p>
+            <p className="text-2xl font-semibold text-gray-900">{produto.preco}</p>
+            <p className="text-green-600 font-semibold mb-4">{produto.desconto}</p>
+            <p className="mb-4">Aqui você pode colocar uma descrição mais detalhada sobre o produto.</p>
+            <button className="bg-[#61a183] text-white px-6 py-2 rounded hover:bg-green-700 transition">
+              Comprar
+            </button>
+          </div>
+        </div>
 
-            <Link href="/pagamento">
-              <button className="bg-[#61a183] text-white px-6 py-2 rounded hover:bg-green-700 transition">
-                Comprar
+        <div className="mt-6">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Avalie o Produto</h2>
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <button
+                key={i}
+                onClick={() => setEstrela(i)}
+                className={`text-2xl ${i <= estrela ? "text-yellow-400" : "text-gray-300"}`}
+              >
+                ★
               </button>
-            </Link>
+            ))}
+          </div>
 
-            <div className="mt-6">
-              <p className="font-semibold text-gray-700 mb-2">
-                Avalie o produto:
-              </p>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((estrela) => (
-                  <button
-                    key={estrela}
-                    onClick={() => setEstrelas(estrela)}
-                    className={`text-2xl ${
-                      estrela <= estrelas ? "text-yellow-400" : "text-gray-300"
-                    }`}
-                  >
-                    ★
-                  </button>
-                ))}
+          <textarea
+            value={comentario}
+            onChange={(e) => setComentario(e.target.value)}
+            placeholder="Escreva um comentário sobre o produto..."
+            className="w-full border border-gray-300 rounded-md p-2 resize-none h-24 mt-4"
+          />
+          <button
+            onClick={handleComentarioSubmit}
+            className="mt-4 bg-[#61a183] text-white px-6 py-2 rounded hover:bg-green-700 transition"
+          >
+            Enviar Comentário
+          </button>
+        </div>
+
+        <div className="mt-6">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">Comentários</h3>
+          <div className="space-y-4">
+            {comentarios.map((comentario, index) => (
+              <div key={index} className="border-b border-gray-300 pb-4">
+                <p className="text-gray-800 font-semibold">Avaliação: {comentario.estrela} ★</p>
+                <p>{comentario.comentario}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {modalOpen && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+              <h3 className="text-lg font-semibold">{modalMessage}</h3>
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={closeModal}
+                  className="bg-[#61a183] text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Fechar
+                </button>
               </div>
             </div>
-
-            <div className="mt-6">
-              <p className="font-semibold text-gray-700 mb-2">
-                Deixe um comentário:
-              </p>
-              <textarea
-                value={comentario}
-                onChange={(e) => setComentario(e.target.value)}
-                placeholder="Escreva aqui o que achou do produto..."
-                className="w-full border border-gray-300 rounded-md p-2 resize-none h-24"
-              />
-              <button className="mt-2 bg-[#61a183] text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                Enviar Comentário
-              </button>
-            </div>
           </div>
-        </div>
-
-        <div className="mt-12">
-          <h2 className="text-2xl font-semibold text-[#61a183] mb-4">
-            Outros produtos recomendados
-          </h2>
-          <div className="overflow-x-auto">
-            <div className="flex gap-6">
-              {produtos
-                .filter((_, idx) => idx != id)
-                .map((p, idx) => (
-                  <Link
-                    key={idx}
-                    href={`/detalhes/${idx}`}
-                    className="min-w-[200px] bg-white rounded-lg shadow-md p-4 flex-shrink-0 border border-gray-200 hover:shadow-xl transition"
-                  >
-                    <Image
-                      src={p.imagem}
-                      alt={p.nome}
-                      width={150}
-                      height={150}
-                      className="rounded-md mx-auto"
-                    />
-                    <p className="text-sm font-bold text-gray-800 mt-3">
-                      {p.nome.slice(0, 50)}...
-                    </p>
-                    <p className="text-[#61a183] font-semibold mt-1">
-                      {p.preco}
-                    </p>
-                  </Link>
-                ))}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
