@@ -21,6 +21,20 @@ export default function ChatInterface() {
     }, 100);
   };
 
+  const normalizeInput = (inputText) => {
+    return inputText.trim().toLowerCase();
+  };
+
+  const isYes = (inputText) => {
+    const yesKeywords = ["sim", "claro", "com certeza", "é claro", "certamente"];
+    return yesKeywords.some(keyword => inputText.includes(keyword));
+  };
+
+  const isNo = (inputText) => {
+    const noKeywords = ["não", "não quero", "nem pensar", "de jeito nenhum", "não sei"];
+    return noKeywords.some(keyword => inputText.includes(keyword));
+  };
+
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -28,46 +42,33 @@ export default function ChatInterface() {
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
+    const normalizedInput = normalizeInput(input);
+
     if (!firstInteraction) {
       setFirstInteraction(true);
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
-          {
-            sender: "bot",
-            text: "Oi! Olá, tudo bom? Seja bem-vindo ao Apete Saúde. 😊",
-          },
-          {
-            sender: "bot",
-            text: "Como posso te ajudar? Gostaria de marcar uma consulta para seu pet? Digite 'sim' ou 'não'.",
-          },
+          { sender: "bot", text: "Oi! Olá, tudo bom? Seja bem-vindo ao Apete Saúde. 😊" },
+          { sender: "bot", text: "Como posso te ajudar? Gostaria de marcar uma consulta para seu pet? Digite 'sim' ou 'não'." },
         ]);
       }, 500);
     } else if (!consultationAsked) {
-      if (input.toLowerCase() === "sim") {
+      if (isYes(normalizedInput)) {
         setConsultationAsked(true);
-        typeMessage(
-          "Você será redirecionado para a página de agendamento de consulta... 🐾",
-          () => {
-            window.location.href = "/agendamento";
-          }
-        );
-      } else if (input.toLowerCase() === "não") {
+        typeMessage("Você será redirecionado para a página de agendamento de consulta... 🐾", () => {
+          window.location.href = "/agendamento";
+        });
+      } else if (isNo(normalizedInput)) {
         typeMessage("Tudo bem! Como posso ajudar de outra forma? 😃", () => {
           setMessages((prev) => [
             ...prev,
-            {
-              sender: "bot",
-              text: "Escolha uma opção digitando o número correspondente:",
-            },
-            {
-              sender: "bot",
-              text: "1️⃣ Ver Produtos\n2️⃣ Formas de Pagamento\n3️⃣ Ajuda\n4️⃣ Contato",
-            },
+            { sender: "bot", text: "Escolha uma opção digitando o número correspondente:" },
+            { sender: "bot", text: "1️⃣ Ver Produtos\n2️⃣ Formas de Pagamento\n3️⃣ Ajuda\n4️⃣ Contato" },
           ]);
         });
       } else {
-        typeMessage("Por favor, digite 'sim' ou 'não'.", () => {});
+        typeMessage("Desculpe, não entendi. Por favor, digite 'sim' ou 'não'.", () => {});
       }
     } else {
       if (input === "1") {
@@ -95,15 +96,18 @@ export default function ChatInterface() {
   return (
     <div className="flex flex-col h-screen bg-[#f5f7fa] font-sans">
       <div className="flex-1 overflow-y-auto px-4 py-3">
-        <div className="bg-white rounded-3xl shadow-lg p-4 flex flex-col space-y-3 h-full">
+        <div className="bg-white rounded-3xl shadow-xl p-4 flex flex-col space-y-3 h-full">
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`p-4 rounded-xl max-w-[80%] text-sm leading-relaxed ${
+              className={`p-4 rounded-xl max-w-[80%] text-sm leading-relaxed transition-transform duration-300 ${
                 msg.sender === "user"
                   ? "bg-[#61a183] text-white self-end shadow-md"
                   : "bg-[#f0f0f0] text-gray-800 self-start shadow-lg"
               }`}
+              style={{
+                transform: msg.sender === "user" ? "translateX(0)" : "translateX(20px)",
+              }}
             >
               {msg.text}
             </div>

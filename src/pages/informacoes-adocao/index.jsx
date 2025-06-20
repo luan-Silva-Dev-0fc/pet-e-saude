@@ -14,6 +14,7 @@ export default function InformacoesAdocao() {
     cidade_estado: '',
     motivo: '',
     ambiente: '',
+    nomeAnimal: '', // Novo campo para o nome do animal
   });
 
   const handleChange = (e) => {
@@ -28,7 +29,7 @@ export default function InformacoesAdocao() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3001/adocao', formData); // ajuste a URL conforme seu backend
+      await axios.post('http://localhost:4028/api/adocoes', formData);
       setShowModal(true);
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
@@ -95,6 +96,15 @@ export default function InformacoesAdocao() {
             onChange={handleChange}
             type="text"
             placeholder="Cidade e Estado"
+            required
+            className="border rounded-lg p-2"
+          />
+          <input
+            name="nomeAnimal" // Novo campo para nome do animal
+            value={formData.nomeAnimal}
+            onChange={handleChange}
+            type="text"
+            placeholder="Nome do animal que deseja adotar"
             required
             className="border rounded-lg p-2"
           />

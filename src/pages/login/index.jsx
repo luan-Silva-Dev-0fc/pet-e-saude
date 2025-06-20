@@ -1,62 +1,58 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { FcGoogle } from "react-icons/fc";
+import { useState } from "react";
+import { useRouter } from "next/router";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("auth") === "false";
-    if (isLoggedIn) {
-      router.push("/");
-    }
-  }, [router]);
-  
-  const handleGoogleLogin = () => {
-    router.push("/login/google");
-  };
-  
-  const handleSignup = () => {
-    router.push("/Cadastro");
-  };
-  
-  const handleRecover = () => {
-    router.push("/recuperar-senha");
-  };
-  
   const handleLogin = async () => {
-    const email = document.getElementById("email")?.value;
-    const password = document.getElementById("password")?.value;
-    
+    console.log("Tentando logar com:", { email, password });
+
     if (!email || !password) {
       toast.error("E-mail e senha são obrigatórios.");
       return;
     }
-    
+
     try {
-      const response = await axios.post("http://localhost:3001/login", {
+      const response = await axios.post("http://localhost:4028/login", {
         email,
         password,
       });
-      
-      if (response.data.success) {
+
+      console.log("Resposta do back-end:", response.data);
+
+      if (response.data.token) {
+        console.log("Login bem-sucedido, salvando token no localStorage...");
         localStorage.setItem("auth", "true");
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        toast.success("Login realizado com sucesso!");
         router.push("/");
       } else {
-        toast.error(response.data.message || "Login falhou.");
+        toast.error("Token não recebido. Verifique o back-end.");
       }
     } catch (error) {
-      toast.error("Erro ao conectar com o servidor.");
+      console.error("Erro na tentativa de login:");
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Erro ao conectar com o servidor.");
+      }
     }
   };
-  
+
+  const handleSignup = () => {
+    router.push("/Cadastro");
+  };
+
+  const handleRecover = () => {
+    router.push("/recuperar-senha");
+  };
+
   return (
     <div className="flex min-h-screen bg-[#61a183] font-sans">
       <ToastContainer />
@@ -71,21 +67,16 @@ export default function Login() {
               E-mail:
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                  </svg>
-                </div>
-                <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none  focus:border-black focus:z-10 sm:text-sm transition-colors"
-                  placeholder="Digite seu email"
-            />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none  focus:border-black focus:z-10 sm:text-sm transition-colors"
+                placeholder="Digite seu email"
+              />
             </div>
           </div>
 
@@ -94,21 +85,6 @@ export default function Login() {
               Senha:
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg
-                  className="h-5 w-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
-              </div>
               <input
                 id="password"
                 name="password"
@@ -120,21 +96,21 @@ export default function Login() {
                 placeholder="Digite sua senha"
               />
               <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.72 6.72a45.847 45.847 0 00-1.901 2.158M9.878 9.878l-1.201-1.201m4.242 4.242L16.08 16.08a45.847 45.847 0 001.901-2.158m-4.242-4.242L14.92 8.48m0 0a45.847 45.847 0 011.901 2.158M14.92 8.48L20.08 3.32M14.92 8.48l-4.242 4.242" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              >
+                {showPassword ? (
+                  <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.72 6.72a45.847 45.847 0 00-1.901 2.158M9.878 9.878l-1.201-1.201m4.242 4.242L16.08 16.08a45.847 45.847 0 001.901-2.158m-4.242-4.242L14.92 8.48m0 0a45.847 45.847 0 011.901 2.158M14.92 8.48L20.08 3.32M14.92 8.48l-4.242 4.242" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
 
@@ -146,21 +122,8 @@ export default function Login() {
             Entrar
           </button>
 
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-100 transition"
-          >
-            <FcGoogle />
-            <span className="text-sm text-black font-medium">
-              Entrar com Google
-            </span>
-          </button>
-
           <div className="text-center">
-            <span className="text-sm text-black">
-              Ainda não tem uma conta?{" "}
-            </span>
+            <span className="text-sm text-black">Ainda não tem uma conta? </span>
             <button
               type="button"
               onClick={handleSignup}

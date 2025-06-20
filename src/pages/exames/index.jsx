@@ -23,11 +23,11 @@ export default function InterfaceExames() {
           ...exame,
           animal: {
             nome: exame.animalnome,
-            especie: "Desconhecida", // Substitua conforme necessário
-            raca: "Desconhecida", // Substitua conforme necessário
-            idade: "Desconhecida", // Substitua conforme necessário
-            sexo: "Desconhecido", // Substitua conforme necessário
-            foto: exame.animalfoto || "/default.jpg", // Usando a foto do animal ou a foto padrão
+            especie: "Desconhecida", 
+            raca: "Desconhecida", 
+            idade: "Desconhecida", 
+            sexo: "Desconhecido", 
+            foto: exame.animalfoto || "/default.jpg", 
           },
         }));
         setExames(examesAdaptados);
@@ -53,7 +53,7 @@ export default function InterfaceExames() {
             className="rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition duration-300 bg-white"
           >
             <img
-              src={exame.animal.foto} // Aqui a imagem será carregada da URL fornecida ou a padrão
+              src={exame.animal.foto} 
               alt={`Foto de ${exame.animal.nome}`}
               className="w-full h-48 object-cover rounded-t-2xl"
             />

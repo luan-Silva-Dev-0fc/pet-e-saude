@@ -154,7 +154,7 @@ export default function Agendamento() {
                 <button
                   onClick={() => setAgendado(false)}
                   className="bg-[#61a183] text-white px-6 py-3 rounded-lg hover:bg-[#51906f] transition duration-200"
-                >
+                > {/* tudo pronto */}
                   Confirmar Agendamento
                 </button>
               </div>

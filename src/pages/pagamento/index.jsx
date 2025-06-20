@@ -15,10 +15,17 @@ const PaymentPage = () => {
   };
 
   const handleCardDetailsChange = (e) => {
-    setCardDetails({
-      ...cardDetails,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    if (name === "number") {
+      // Remove tudo que não for número
+      let formattedValue = value.replace(/\D/g, "");
+      // Formata para grupos de 4 números
+      formattedValue = formattedValue.replace(/(\d{4})(?=\d)/g, "$1 ");
+      setCardDetails({ ...cardDetails, [name]: formattedValue });
+    } else {
+      setCardDetails({ ...cardDetails, [name]: value });
+    }
   };
 
   return (
@@ -57,6 +64,7 @@ const PaymentPage = () => {
                 placeholder="**** **** **** ****"
                 value={cardDetails.number}
                 onChange={handleCardDetailsChange}
+                maxLength="19" // Limita o número de caracteres
               />
             </div>
             <div className="mb-4">
@@ -95,6 +103,7 @@ const PaymentPage = () => {
                   placeholder="***"
                   value={cardDetails.cvc}
                   onChange={handleCardDetailsChange}
+                  maxLength="3" // Limita o CVV a 3 caracteres
                 />
               </div>
             </div>

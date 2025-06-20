@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
@@ -7,20 +7,24 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function PageCadastro() {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSignup = async () => {
     try {
-      await axios.post("http://localhost:4028/auth/register", {
+      await axios.post("http://localhost:4028/api/users", {
+        name,
         email,
         password
       });
       toast.success("Cadastro realizado com sucesso!");
       setTimeout(() => router.push("/login"), 2000);
     } catch (error) {
-      toast.error("Erro ao cadastrar. Verifique os dados.");
+      toast.error(
+        error.response?.data?.error || "Erro ao cadastrar. Verifique os dados."
+      );
     }
   };
 
@@ -35,13 +39,24 @@ export default function PageCadastro() {
 
           <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
             <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
+              <div className="relative">
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:border-black focus:z-10 sm:text-sm transition-colors"
+                  placeholder="Digite seu nome"
+                />
+              </div>
+            </div>
+
+            <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">E-mail</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                  </svg>
-                </div>
                 <input
                   id="email"
                   name="email"
@@ -49,7 +64,7 @@ export default function PageCadastro() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none  focus:border-black focus:z-10 sm:text-sm transition-colors"
+                  className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:border-black focus:z-10 sm:text-sm transition-colors"
                   placeholder="Digite seu email"
                 />
               </div>
@@ -58,11 +73,6 @@ export default function PageCadastro() {
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">Senha</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
                 <input
                   id="password"
                   name="password"
@@ -70,7 +80,7 @@ export default function PageCadastro() {
                   onChange={(e) => setPassword(e.target.value)}
                   type={showPassword ? "text" : "password"}
                   required
-                  className="appearance-none relative block mt-2 w-full pl-10 pr-12 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none  focus:border-black focus:z-10 sm:text-sm transition-colors"
+                  className="appearance-none relative block mt-2 w-full pl-10 pr-12 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:border-black focus:z-10 sm:text-sm transition-colors"
                   placeholder="Digite sua senha"
                 />
                 <button
@@ -80,12 +90,13 @@ export default function PageCadastro() {
                 >
                   {showPassword ? (
                     <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029..." />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.54 9.54A3.5 3.5 0 0112 15.5a3.5 3.5 0 01-3.54-5.96" />
                     </svg>
                   ) : (
                     <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12..." />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.543 7-1.275 4.057-5.065 7-9.543 7-4.478 0-8.268-2.943-9.542-7z" />
                     </svg>
                   )}
                 </button>

@@ -11,6 +11,7 @@ export default function QuemSomos() {
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [order, setOrder] = useState([1, 2, 3, 4, 5, 6]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("auth") === "true";
@@ -48,6 +49,19 @@ export default function QuemSomos() {
     router.push(`/animal/${id}`);
   };
 
+  const handleLogout = () => {
+    setShowModal(true);
+  };
+
+  const confirmLogout = () => {
+    localStorage.removeItem("auth");
+    router.push("/login");
+  };
+
+  const cancelLogout = () => {
+    setShowModal(false);
+  };
+
   return (
     <>
       <div className="absolute top-6 left-6 right-6 z-20 flex items-center justify-start">
@@ -70,21 +84,111 @@ export default function QuemSomos() {
       </div>
 
       {menuOpen && (
-        <div className="fixed top-0 left-0 h-full w-64 bg-gray-100 shadow-lg z-30 p-6 flex flex-col gap-2">
-          <button
-            onClick={() => setMenuOpen(false)}
-            className="absolute top-4 right-4 text-gray-700"
-          >
-            <X size={28} />
-          </button>
-          <button
-            onClick={() => router.push("/login")}
-            className="flex items-center gap-1 text-gray-800 hover:text-emerald-600"
-          >
-            <BsArrowLeftCircle size={30} />
-            <h1>Voltar</h1>
-          </button>
+        <motion.div
+          initial={{ x: -300 }}
+          animate={{ x: 0 }}
+          exit={{ x: -300 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-white via-gray-100 to-white shadow-2xl z-30 p-6 rounded-tr-3xl rounded-br-3xl flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={40}
+                height={40}
+                className="cursor-pointer"
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/");
+                }}
+              />
+              <button onClick={() => setMenuOpen(false)} className="text-gray-700 hover:text-red-500 transition">
+                <X size={28} />
+              </button>
+            </div>
 
+            <div className="flex flex-col gap-4 mt-4 text-gray-700 font-medium">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/produtos");
+                }}
+                className="hover:text-emerald-600 transition"
+              >
+                Produtos
+              </button>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/exames");
+                }}
+                className="hover:text-emerald-600 transition"
+              >
+                Exames
+              </button>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/chat");
+                }}
+                className="hover:text-emerald-600 transition"
+              >
+                Chat
+              </button>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/denuncia-maus-tratos");
+                }}
+                className="hover:text-emerald-600 transition"
+              >
+                Denúncia de Maus-Tratos
+              </button>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/contatos");
+                }}
+                className="hover:text-emerald-600 transition"
+              >
+                Contatos
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="mt-6 flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 px-4 rounded-xl hover:bg-emerald-700 transition"
+          >
+            <BsArrowLeftCircle size={22} />
+            <span>Sair</span>
+          </button>
+        </motion.div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 flex justify-center items-center z-40 bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+              Você deseja realmente sair e voltar para a página de login?
+            </h2>
+            <div className="flex justify-between">
+              <button
+                onClick={confirmLogout}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+              >
+                Sim
+              </button>
+              <button
+                onClick={cancelLogout}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
+              >
+                Não
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -104,31 +208,19 @@ export default function QuemSomos() {
             </form>
 
             <nav className="mb-8">
-              <div className="hidden md:flex space-x-20 text-gray-700">
-                <button onClick={() => router.push("/produtos")}>
-                  Produtos
-                </button>
+              <div className="hidden md:flex justify-center gap-10 text-gray-700 border-b-4 border-[#61a183] pb-2">
+                <button onClick={() => router.push("/produtos")}>Produtos</button>
                 <button onClick={() => router.push("/exames")}>Exames</button>
                 <button onClick={() => router.push("/chat")}>Chat</button>
-                <button onClick={() => router.push("/avaliacoes")}>
-                  Avaliações
-                </button>
-                <button onClick={() => router.push("/contatos")}>
-                  Contatos
-                </button>
+                <button onClick={() => router.push("/denuncia-maus-tratos")}>Denúncia de Maus-Tratos</button>
+                <button onClick={() => router.push("/contatos")}>Contatos</button>
               </div>
-              <div className="flex md:hidden justify-center gap-4 text-gray-700 mb-8">
-                <button onClick={() => router.push("/produtos")}>
-                  Produtos
-                </button>
+              <div className="flex md:hidden justify-center flex-wrap gap-4 text-gray-700 border-b-4 border-[#61a183] pb-2">
+                <button onClick={() => router.push("/produtos")}>Produtos</button>
                 <button onClick={() => router.push("/exames")}>Exames</button>
                 <button onClick={() => router.push("/chat")}>Chat</button>
-                <button onClick={() => router.push("/avaliacoes")}>
-                  Avaliações
-                </button>
-                <button onClick={() => router.push("/contatos")}>
-                  Contatos
-                </button>
+                <button onClick={() => router.push("/denuncia-maus-tratos")}>Denúncia de Maus-Tratos</button>
+                <button onClick={() => router.push("/contatos")}>Contatos</button>
               </div>
             </nav>
 

@@ -36,9 +36,9 @@ export default function Produtos() {
               </p>
               <p className="text-black font-bold">{produto.nome}</p>
               <p className="text-lg text-black font-bold">{produto.preco}</p>
-              <Link href={`/detalhes/${index}`}>
-                <button className="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
-                  Ver Detalhes
+              <Link href="/pagamento">
+                <button className="mt-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                  Comprar
                 </button>
               </Link>
             </div>
