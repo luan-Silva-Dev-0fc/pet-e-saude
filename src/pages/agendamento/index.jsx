@@ -1,6 +1,17 @@
 import { useState } from "react";
 import Head from "next/head";
-import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Calendar, 
+  User, 
+  Phone, 
+  Stethoscope, 
+  Dog, 
+  CheckCircle2, 
+  AlertCircle,
+  Clock,
+  ChevronRight
+} from "lucide-react";
 
 export default function Agendamento() {
   const [pet, setPet] = useState("");
@@ -15,153 +26,206 @@ export default function Agendamento() {
   const handleAgendar = async () => {
     if (pet && dataHora && tipoConsulta && nome && telefone) {
       setLoading(true);
-      try {
-        await axios.post("http://localhost:4028/api/agendamentos", {
-          pet,
-          dataHora,
-          tipoConsulta,
-          nome,
-          telefone,
-          ligadoAExame: tipoConsulta === "exame"
-        });
-        setAgendado(true);
-        setShowModal("sucesso");
-      } catch (error) {
-        console.error("Erro ao agendar:", error);
-        setShowModal("erro");
-      } finally {
-        setLoading(false);
-      }
+      
+      // Simulação de delay de rede
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setAgendado(true);
+      setShowModal("sucesso");
+      setLoading(false);
     } else {
       setShowModal("erro");
     }
   };
 
-  const Modal = ({ mensagem }) => (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-xl text-center space-y-4 max-w-sm w-full">
-        <p className="text-[#61a183] font-semibold">{mensagem}</p>
+  const Modal = ({ tipo, mensagem }) => (
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4"
+    >
+      <motion.div 
+        initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+        className="bg-white p-8 rounded-[2.5rem] shadow-2xl text-center space-y-4 max-w-sm w-full border border-gray-100"
+      >
+        <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center ${tipo === 'sucesso' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+          {tipo === 'sucesso' ? <CheckCircle2 size={32} /> : <AlertCircle size={32} />}
+        </div>
+        <h3 className="text-xl font-black text-gray-800">
+          {tipo === 'sucesso' ? 'Tudo certo!' : 'Ops! Algo falta'}
+        </h3>
+        <p className="text-gray-500 font-medium">{mensagem}</p>
         <button
           onClick={() => setShowModal(null)}
-          className="bg-[#61a183] text-white px-4 py-2 rounded hover:bg-[#51906f]"
+          className="w-full bg-[#26885a] text-white py-4 rounded-2xl font-bold hover:bg-[#1e6b47] transition-all shadow-lg shadow-emerald-100"
         >
-          OK
+          Entendido
         </button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 
   return (
-    <>
+    <div className="bg-[#f8faf9] min-h-screen font-sans">
       <Head>
-        <title>Agendamento de Consulta | Apete Saúde</title>
-        <meta name="description" content="Agende uma consulta para seu pet com a Apete Saúde." />
+        <title>Agendamento | Pet & Saúde</title>
       </Head>
 
-      {showModal === "sucesso" && <Modal mensagem="Agendamento feito com sucesso!" />}
-      {showModal === "erro" && <Modal mensagem="Por favor, preencha todos os campos." />}
+      <AnimatePresence>
+        {showModal === "sucesso" && <Modal tipo="sucesso" mensagem="Seu agendamento foi processado com sucesso!" />}
+        {showModal === "erro" && <Modal tipo="erro" mensagem="Preencha todos os campos para continuar o agendamento." />}
+      </AnimatePresence>
 
-      <div className="bg-[#f5f7fa] min-h-screen flex flex-col">
-        <div className="max-w-4xl mx-auto py-12 px-6">
-          <h1 className="text-3xl font-bold text-[#61a183] text-center mb-8">
-            Agendamento de Consulta
+      <div className="max-w-2xl mx-auto py-12 px-6">
+        <header className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-full mb-4">
+            <Calendar size={18} className="text-[#26885a]" />
+            <span className="text-[#26885a] text-sm font-black uppercase tracking-widest">Reserva Online</span>
+          </div>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tight">
+            Agendar <span className="text-[#26885a]">Consulta</span>
           </h1>
+          <p className="text-gray-500 mt-2 font-medium text-lg">Escolha o melhor horário para o seu amigo.</p>
+        </header>
 
+        <motion.div 
+          layout
+          className="bg-white p-8 md:p-10 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-gray-100"
+        >
           {!agendado ? (
-            <div className="bg-white p-8 rounded-xl shadow-lg space-y-6">
-              <div>
-                <label className="block text-gray-700 font-semibold">Selecione o Pet</label>
-                <select
-                  className="w-full mt-2 p-3 border border-gray-300 rounded-lg"
-                  value={pet}
-                  onChange={(e) => setPet(e.target.value)}
-                >
-                  <option value="">Escolha um pet</option>
-                  <option value="dog">Cachorro</option>
-                  <option value="cat">Gato</option>
-                </select>
+            <div className="space-y-6">
+              {/* Seleção de Pet e Tipo */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide ml-1">
+                    <Dog size={16} /> Pet
+                  </label>
+                  <select
+                    className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all font-medium text-gray-700"
+                    value={pet}
+                    onChange={(e) => setPet(e.target.value)}
+                  >
+                    <option value="">Escolha um pet</option>
+                    <option value="dog">Cachorro</option>
+                    <option value="cat">Gato</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide ml-1">
+                    <Stethoscope size={16} /> Serviço
+                  </label>
+                  <select
+                    className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all font-medium text-gray-700"
+                    value={tipoConsulta}
+                    onChange={(e) => setTipoConsulta(e.target.value)}
+                  >
+                    <option value="">Tipo de consulta</option>
+                    <option value="consulta">Consulta Inicial</option>
+                    <option value="exame">Exame Geral</option>
+                    <option value="vacina">Vacinação</option>
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-gray-700 font-semibold">Tipo de Consulta</label>
-                <select
-                  className="w-full mt-2 p-3 border border-gray-300 rounded-lg"
-                  value={tipoConsulta}
-                  onChange={(e) => setTipoConsulta(e.target.value)}
-                >
-                  <option value="">Escolha o tipo de consulta</option>
-                  <option value="consulta">Consulta Inicial</option>
-                  <option value="exame">Exame</option>
-                  <option value="vacina">Vacinação</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-semibold">Data e Hora</label>
+              {/* Data e Hora */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide ml-1">
+                  <Clock size={16} /> Data e Horário
+                </label>
                 <input
                   type="datetime-local"
-                  className="w-full mt-2 p-3 border border-gray-300 rounded-lg"
+                  className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all font-medium text-gray-700"
                   value={dataHora}
                   onChange={(e) => setDataHora(e.target.value)}
                 />
               </div>
 
-              <div>
-                <label className="block text-gray-700 font-semibold">Seu Nome</label>
-                <input
-                  type="text"
-                  className="w-full mt-2 p-3 border border-gray-300 rounded-lg"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                />
+              {/* Dados do Tutor */}
+              <div className="pt-4 border-t border-gray-50 space-y-6">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide ml-1">
+                    <User size={16} /> Nome Completo
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Como devemos te chamar?"
+                    className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all font-medium text-gray-700"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide ml-1">
+                    <Phone size={16} /> WhatsApp / Telefone
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="(00) 00000-0000"
+                    className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all font-medium text-gray-700"
+                    value={telefone}
+                    onChange={(e) => setTelefone(e.target.value)}
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-gray-700 font-semibold">Seu Telefone</label>
-                <input
-                  type="text"
-                  className="w-full mt-2 p-3 border border-gray-300 rounded-lg"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                />
-              </div>
-
-              <div className="flex justify-center">
-                <button
-                  onClick={handleAgendar}
-                  className={`bg-[#61a183] text-white px-6 py-3 rounded-lg hover:bg-[#51906f] transition duration-200 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                  disabled={loading}
-                >
-                  {loading ? "Agendando..." : "Agendar Consulta"}
-                </button>
-              </div>
+              <button
+                onClick={handleAgendar}
+                disabled={loading}
+                className="w-full bg-[#26885a] text-white py-5 rounded-[2rem] font-black text-lg hover:bg-[#1e6b47] transition-all flex items-center justify-center gap-3 shadow-xl shadow-emerald-100 disabled:opacity-50"
+              >
+                {loading ? "Processando..." : "Confirmar Agendamento"}
+                {!loading && <ChevronRight size={20} />}
+              </button>
             </div>
           ) : (
-            <div className="bg-white p-8 rounded-xl shadow-lg space-y-6">
-              <h2 className="text-xl font-bold text-[#61a183] text-center mb-6">
-                Resumo do Agendamento
-              </h2>
-              <div>
-                <p className="font-semibold text-gray-700">
-                  Pet: {pet === "dog" ? "Cachorro - Fido" : "Gato - Nino"}
-                </p>
-                <p className="font-semibold text-gray-700">Tipo de Consulta: {tipoConsulta}</p>
-                <p className="font-semibold text-gray-700">Data e Hora: {dataHora}</p>
-                <p className="font-semibold text-gray-700">Nome: {nome}</p>
-                <p className="font-semibold text-gray-700">Telefone: {telefone}</p>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+              className="space-y-8"
+            >
+              <div className="text-center">
+                <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 size={40} />
+                </div>
+                <h2 className="text-2xl font-black text-gray-800">Quase lá!</h2>
+                <p className="text-gray-500 font-medium">Confira as informações abaixo antes de finalizar.</p>
               </div>
-              <div className="flex justify-center">
+
+              <div className="bg-gray-50 p-6 rounded-[2rem] space-y-4 border border-gray-100">
+                <DetailRow label="Paciente" value={pet === "dog" ? "Cachorro" : "Gato"} />
+                <DetailRow label="Serviço" value={tipoConsulta} />
+                <DetailRow label="Data" value={new Date(dataHora).toLocaleString()} />
+                <DetailRow label="Tutor" value={nome} />
+                <DetailRow label="Contato" value={telefone} />
+              </div>
+
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={() => setAgendado(false)}
-                  className="bg-[#61a183] text-white px-6 py-3 rounded-lg hover:bg-[#51906f] transition duration-200"
-                > {/* tudo pronto */}
-                  Confirmar Agendamento
+                  className="w-full bg-[#26885a] text-white py-5 rounded-[2rem] font-black text-lg hover:bg-[#1e6b47] transition-all shadow-xl shadow-emerald-100"
+                >
+                  Finalizar Agendamento
+                </button>
+                <button
+                  onClick={() => setAgendado(false)}
+                  className="w-full bg-transparent text-gray-400 py-3 rounded-2xl font-bold hover:text-gray-600 transition-all"
+                >
+                  Editar Informações
                 </button>
               </div>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </div>
-    </>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }) {
+  return (
+    <div className="flex justify-between items-center py-1">
+      <span className="text-gray-400 font-bold text-xs uppercase tracking-widest">{label}</span>
+      <span className="text-gray-800 font-extrabold capitalize">{value}</span>
+    </div>
   );
 }

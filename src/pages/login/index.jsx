@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
+import { Eye, EyeOff, Mail, Lock, Loader2, HeartPulse } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
@@ -9,152 +9,171 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    console.log("Tentando logar com:", { email, password });
+  const handleLogin = async (e) => {
+    if (e) e.preventDefault();
 
     if (!email || !password) {
-      toast.error("E-mail e senha são obrigatórios.");
+      toast.error("Por favor, preencha todos os campos.");
       return;
     }
 
+    setIsLoading(true);
+
+    // --- SIMULAÇÃO DE LOGIN ---
     try {
-      const response = await axios.post("http://localhost:4028/login", {
-        email,
-        password,
-      });
+      // Simula o tempo de resposta do servidor (1.2 segundos)
+      await new Promise((resolve) => setTimeout(resolve, 1200));
 
-      console.log("Resposta do back-end:", response.data);
-
-      if (response.data.token) {
-        console.log("Login bem-sucedido, salvando token no localStorage...");
+      // Lógica de simulação: aceita qualquer email e a senha "123456"
+      if (password === "123456") {
         localStorage.setItem("auth", "true");
-        localStorage.setItem("token", response.data.token);
-        toast.success("Login realizado com sucesso!");
-        router.push("/");
+        localStorage.setItem("token", "simulated-jwt-token-123");
+        toast.success("Login simulado com sucesso!");
+
+        // Redireciona após o toast
+        setTimeout(() => router.push("/"), 1000);
       } else {
-        toast.error("Token não recebido. Verifique o back-end.");
+        toast.error("E-mail ou senha incorretos (Dica: use 123456)");
       }
     } catch (error) {
-      console.error("Erro na tentativa de login:");
-      if (error.response?.data?.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Erro ao conectar com o servidor.");
-      }
+      toast.error("Erro inesperado na simulação.");
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleSignup = () => {
-    router.push("/Cadastro");
-  };
-
-  const handleRecover = () => {
-    router.push("/recuperar-senha");
+    // --- FIM DA SIMULAÇÃO ---
   };
 
   return (
-    <div className="flex min-h-screen bg-[#61a183] font-sans">
-      <ToastContainer />
-      <div className="w-full md:w-1/2 bg-white px-8 md:px-12 py-16 flex flex-col justify-center shadow-2xl rounded-r-3xl">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-          Acesse sua conta
-        </h2>
+    <div className="flex min-h-screen bg-gradient-to-tr from-[#528d72] via-[#61a183] to-[#a3d5bd] font-sans items-center justify-center p-6">
+      <ToastContainer theme="colored" position="top-right" />
 
-        <form className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              E-mail:
-            </label>
-            <div className="relative">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none  focus:border-black focus:z-10 sm:text-sm transition-colors"
-                placeholder="Digite seu email"
-              />
+      <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2.5rem] overflow-hidden">
+        {/* Coluna do Formulário */}
+        <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center bg-white">
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-3">
+              <HeartPulse className="text-[#26885a] w-6 h-6" />
+              <span className="text-[#26885a] font-bold tracking-widest text-xs uppercase">
+                Pet e Saúde
+              </span>
             </div>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-800 leading-tight">
+              Cuidar de quem nos faz{" "}
+              <span className="text-[#26885a]">feliz.</span>
+            </h2>
+            <p className="text-gray-500 mt-3 font-medium">
+              Acesse sua conta para gerenciar os cuidados do seu melhor amigo.
+            </p>
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Senha:
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type={showPassword ? "text" : "password"}
-                required
-                className="appearance-none relative block mt-2 w-full pl-10 pr-12 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none  focus:border-black focus:z-10 sm:text-sm transition-colors"
-                placeholder="Digite sua senha"
-              />
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wider ml-1">
+                E-mail
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[#26885a] transition-colors" />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="block w-full pl-11 pr-4 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
+                  placeholder="exemplo@email.com"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wider ml-1">
+                Senha
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-[#26885a] transition-colors" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full pl-11 pr-12 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
+                  placeholder="Dica: use 123456"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-[#26885a] transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-1">
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => router.push("/recuperar-senha")}
+                className="text-sm font-bold text-[#26885a] hover:text-[#1e6b47] transition-all"
               >
-                {showPassword ? (
-                  <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.72 6.72a45.847 45.847 0 00-1.901 2.158M9.878 9.878l-1.201-1.201m4.242 4.242L16.08 16.08a45.847 45.847 0 001.901-2.158m-4.242-4.242L14.92 8.48m0 0a45.847 45.847 0 011.901 2.158M14.92 8.48L20.08 3.32M14.92 8.48l-4.242 4.242" />
-                  </svg>
-                ) : (
-                  <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                Esqueceu a senha?
               </button>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={handleLogin}
-            className="w-full bg-[#26885a] text-white font-bold py-3 px-4 rounded-xl transition duration-300 shadow-md"
-          >
-            Entrar
-          </button>
-
-          <div className="text-center">
-            <span className="text-sm text-black">Ainda não tem uma conta? </span>
             <button
-              type="button"
-              onClick={handleSignup}
-              className="text-green-800 hover:underline text-sm font-semibold"
+              disabled={isLoading}
+              className="w-full bg-[#26885a] hover:bg-[#1e6b47] text-white font-extrabold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-green-100 flex items-center justify-center gap-3 active:scale-[0.97] disabled:opacity-70"
             >
-              Cadastre-se
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin h-5 w-5" />
+                  <span>Autenticando...</span>
+                </>
+              ) : (
+                "Entrar no Sistema"
+              )}
             </button>
+          </form>
+
+          <div className="mt-10 text-center border-t border-gray-100 pt-6">
+            <p className="text-gray-500 font-medium">
+              Novo por aqui?{" "}
+              <button
+                onClick={() => router.push("/Cadastro")}
+                className="text-[#26885a] font-extrabold hover:underline underline-offset-4"
+              >
+                Crie uma conta gratuita
+              </button>
+            </p>
           </div>
-        </form>
+        </div>
 
-        <p className="mt-6 text-center text-sm text-black">
-          Esqueceu sua senha?{" "}
-          <button
-            type="button"
-            onClick={handleRecover}
-            className="text-green-800 hover:underline text-sm font-semibold"
-          >
-            Recuperar
-          </button>
-        </p>
+        {/* Coluna da Imagem Lateral */}
+        <div className="hidden md:flex w-1/2 bg-[#f8faf9] items-center justify-center p-12 relative">
+          <div className="absolute w-80 h-80 bg-[#61a183]/10 rounded-full blur-3xl"></div>
+
+          <img
+            src="/veterinary-animate.svg"
+            alt="Ilustração Veterinária"
+            className="relative w-full max-w-sm drop-shadow-2xl animate-float"
+            style={{ animation: "float 6s ease-in-out infinite" }}
+          />
+        </div>
       </div>
 
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-[#61a183] md:bg-transparent">
-        <img
-          src="/veterinary-animate.svg"
-          alt="Logo"
-          width={390}
-          height={390}
-          className="drop-shadow-lg"
-        />
-      </div>
+      <style jsx>{`
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+        }
+      `}</style>
     </div>
   );
 }

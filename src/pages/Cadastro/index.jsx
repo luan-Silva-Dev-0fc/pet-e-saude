@@ -1,139 +1,179 @@
-'use client';
+"use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
+import { User, Mail, Lock, Eye, EyeOff, Loader2, PawPrint } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function PageCadastro() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
+
+    if (!name || !email || !password) {
+      toast.error("Preencha todos os campos para continuar.");
+      return;
+    }
+
+    setIsLoading(true);
     try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       await axios.post("http://localhost:4028/api/users", {
         name,
         email,
-        password
+        password,
       });
-      toast.success("Cadastro realizado com sucesso!");
+
+      toast.success("Conta criada! Redirecionando...");
       setTimeout(() => router.push("/login"), 2000);
     } catch (error) {
       toast.error(
-        error.response?.data?.error || "Erro ao cadastrar. Verifique os dados."
+        error.response?.data?.error || "Erro ao cadastrar. Verifique os dados.",
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <ToastContainer />
-      <div className="flex min-h-screen bg-[#61a183] font-sans">
-        <div className="w-full md:w-1/2 bg-white px-8 md:px-12 py-16 flex flex-col justify-center shadow-2xl rounded-r-3xl mx-4 md:mx-0">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-            Crie sua conta
-          </h2>
+    <div className="flex min-h-screen bg-gradient-to-br from-[#528d72] via-[#61a183] to-[#a3d5bd] font-sans items-center justify-center p-6">
+      <ToastContainer theme="colored" />
 
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
-              <div className="relative">
+      <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2.5rem] overflow-hidden">
+        <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center bg-white order-2 md:order-1">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <PawPrint className="text-[#26885a] w-6 h-6" />
+              <span className="text-[#26885a] font-bold tracking-widest text-xs uppercase">
+                Junte-se a nós
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-800 leading-tight">
+              Comece uma nova <span className="text-[#26885a]">jornada.</span>
+            </h2>
+            <p className="text-gray-500 mt-3 font-medium">
+              Crie sua conta e ofereça o melhor para o seu pet.
+            </p>
+          </div>
+
+          <form onSubmit={handleSignup} className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wider ml-1">
+                Nome Completo
+              </label>
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#26885a] transition-colors w-5 h-5" />
                 <input
-                  id="name"
-                  name="name"
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:border-black focus:z-10 sm:text-sm transition-colors"
-                  placeholder="Digite seu nome"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
+                  placeholder="Seu nome"
                 />
               </div>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">E-mail</label>
-              <div className="relative">
+            <div className="space-y-1">
+              <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wider ml-1">
+                E-mail
+              </label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#26885a] transition-colors w-5 h-5" />
                 <input
-                  id="email"
-                  name="email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none relative block mt-2 w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:border-black focus:z-10 sm:text-sm transition-colors"
-                  placeholder="Digite seu email"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
+                  placeholder="exemplo@email.com"
                 />
               </div>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Senha</label>
-              <div className="relative">
+            <div className="space-y-1">
+              <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wider ml-1">
+                Senha
+              </label>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#26885a] transition-colors w-5 h-5" />
                 <input
-                  id="password"
-                  name="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   type={showPassword ? "text" : "password"}
                   required
-                  className="appearance-none relative block mt-2 w-full pl-10 pr-12 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:border-black focus:z-10 sm:text-sm transition-colors"
-                  placeholder="Digite sua senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-12 pr-12 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
+                  placeholder="Crie uma senha forte"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#26885a] transition-colors"
                 >
-                  {showPassword ? (
-                    <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.54 9.54A3.5 3.5 0 0112 15.5a3.5 3.5 0 01-3.54-5.96" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.543 7-1.275 4.057-5.065 7-9.543 7-4.478 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
 
             <button
+              disabled={isLoading}
               type="submit"
-              onClick={handleSignup}
-              className="w-full bg-[#26885a] text-white font-bold py-3 px-4 rounded-xl transition duration-300 shadow-md"
+              className="w-full bg-[#26885a] hover:bg-[#1e6b47] text-white font-extrabold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-green-100 flex items-center justify-center gap-3 active:scale-[0.97] disabled:opacity-70 mt-4"
             >
-              Cadastrar
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin h-5 w-5" />
+                  <span>Criando conta...</span>
+                </>
+              ) : (
+                "Cadastrar agora"
+              )}
             </button>
-
-            <div className="text-center">
-              <span className="text-sm text-gray-600">já possui uma conta? </span>
-              <button
-                type="button"
-                onClick={() => router.push("/login")}
-                className="text-green-800 hover:underline text-sm font-semibold"
-              >
-                login
-              </button>
-            </div>
           </form>
+
+          <div className="mt-8 text-center border-t border-gray-100 pt-6">
+            <p className="text-gray-500 font-medium">
+              Já possui uma conta?{" "}
+              <button
+                onClick={() => router.push("/login")}
+                className="text-[#26885a] font-extrabold hover:underline underline-offset-4"
+              >
+                Fazer login
+              </button>
+            </p>
+          </div>
         </div>
 
-        <div className="w-full md:w-1/2 flex items-center justify-center bg-[#61a183] md:bg-transparent">
+        <div className="w-full md:w-1/2 bg-[#f8faf9] flex items-center justify-center p-12 relative order-1 md:order-2">
+          <div className="absolute w-72 h-72 bg-[#61a183]/10 rounded-full blur-3xl"></div>
           <img
             src="/adopt-a-pet-animate.svg"
-            alt="Logo"
-            width={390}
-            height={390}
-            className="drop-shadow-lg"
+            alt="Adopt a Pet"
+            className="relative w-full max-w-sm drop-shadow-2xl"
+            style={{ animation: "float 6s ease-in-out infinite" }}
           />
         </div>
       </div>
-    </>
+
+      <style jsx>{`
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-15px);
+          }
+        }
+      `}</style>
+    </div>
   );
 }
