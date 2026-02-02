@@ -2,8 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
-import { User, Mail, Lock, Eye, EyeOff, Loader2, PawPrint } from "lucide-react";
+import { motion } from "framer-motion";
+import { User, Mail, Lock, Eye, EyeOff, Loader2, PawPrint, ArrowRight } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function PageCadastro() {
@@ -24,156 +24,157 @@ export default function PageCadastro() {
 
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      await axios.post("http://localhost:4028/api/users", {
-        name,
-        email,
-        password,
+      // Substituído Axios por Fetch Nativo para corrigir o erro da Vercel
+      const response = await fetch("http://localhost:4028/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao cadastrar.");
+      }
 
       toast.success("Conta criada! Redirecionando...");
       setTimeout(() => router.push("/login"), 2000);
     } catch (error) {
-      toast.error(
-        error.response?.data?.error || "Erro ao cadastrar. Verifique os dados.",
-      );
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-[#528d72] via-[#61a183] to-[#a3d5bd] font-sans items-center justify-center p-6">
+    <div className="flex min-h-screen bg-[#f0f4f2] items-center justify-center p-4 md:p-6 font-sans overflow-hidden relative">
       <ToastContainer theme="colored" />
+      
+      {/* Elementos Decorativos de Fundo */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-200/40 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-green-200/30 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2.5rem] overflow-hidden">
-        <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center bg-white order-2 md:order-1">
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-3">
-              <PawPrint className="text-[#26885a] w-6 h-6" />
-              <span className="text-[#26885a] font-bold tracking-widest text-xs uppercase">
-                Junte-se a nós
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-800 leading-tight">
-              Comece uma nova <span className="text-[#26885a]">jornada.</span>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col md:flex-row w-full max-w-6xl bg-white/80 backdrop-blur-xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] rounded-[3rem] border border-white overflow-hidden z-10"
+      >
+        {/* Lado Esquerdo: Formulário */}
+        <div className="w-full md:w-[55%] p-8 md:p-16 flex flex-col justify-center">
+          <div className="mb-10">
+            <motion.div 
+              initial={{ x: -20 }} animate={{ x: 0 }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest mb-4"
+            >
+              <PawPrint size={14} /> Nova Conta
+            </motion.div>
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter leading-none">
+              Crie sua <span className="text-emerald-600">Jornada.</span>
             </h2>
-            <p className="text-gray-500 mt-3 font-medium">
-              Crie sua conta e ofereça o melhor para o seu pet.
+            <p className="text-gray-500 mt-4 font-medium text-lg">
+              Ofereça o melhor cuidado para quem você ama.
             </p>
           </div>
 
-          <form onSubmit={handleSignup} className="space-y-5">
-            <div className="space-y-1">
-              <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wider ml-1">
-                Nome Completo
-              </label>
-              <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#26885a] transition-colors w-5 h-5" />
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
-                  placeholder="Seu nome"
-                />
-              </div>
+          <form onSubmit={handleSignup} className="space-y-6">
+            <InputField 
+              label="Nome Completo" 
+              icon={<User size={20} />} 
+              type="text" 
+              placeholder="Como deseja ser chamado?" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+            />
+            
+            <InputField 
+              label="E-mail" 
+              icon={<Mail size={20} />} 
+              type="email" 
+              placeholder="exemplo@pet.com" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+            />
+
+            <div className="relative group">
+              <InputField 
+                label="Senha" 
+                icon={<Lock size={20} />} 
+                type={showPassword ? "text" : "password"} 
+                placeholder="Mínimo 6 caracteres" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-[46px] text-gray-400 hover:text-emerald-600 transition-colors"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wider ml-1">
-                E-mail
-              </label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#26885a] transition-colors w-5 h-5" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
-                  placeholder="exemplo@email.com"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wider ml-1">
-                Senha
-              </label>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#26885a] transition-colors w-5 h-5" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
-                  placeholder="Crie uma senha forte"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#26885a] transition-colors"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <button
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
               disabled={isLoading}
               type="submit"
-              className="w-full bg-[#26885a] hover:bg-[#1e6b47] text-white font-extrabold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-green-100 flex items-center justify-center gap-3 active:scale-[0.97] disabled:opacity-70 mt-4"
+              className="w-full bg-gray-900 hover:bg-black text-white font-black py-5 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl disabled:opacity-70 mt-4"
             >
               {isLoading ? (
-                <>
-                  <Loader2 className="animate-spin h-5 w-5" />
-                  <span>Criando conta...</span>
-                </>
+                <Loader2 className="animate-spin h-5 w-5 text-emerald-400" />
               ) : (
-                "Cadastrar agora"
+                <>Criar Conta <ArrowRight size={20} /></>
               )}
-            </button>
+            </motion.button>
           </form>
 
-          <div className="mt-8 text-center border-t border-gray-100 pt-6">
-            <p className="text-gray-500 font-medium">
-              Já possui uma conta?{" "}
-              <button
-                onClick={() => router.push("/login")}
-                className="text-[#26885a] font-extrabold hover:underline underline-offset-4"
-              >
-                Fazer login
-              </button>
-            </p>
-          </div>
+          <p className="mt-10 text-center text-gray-500 font-bold">
+            Já é de casa?{" "}
+            <button onClick={() => router.push("/login")} className="text-emerald-600 hover:underline">
+              Fazer Login
+            </button>
+          </p>
         </div>
 
-        <div className="w-full md:w-1/2 bg-[#f8faf9] flex items-center justify-center p-12 relative order-1 md:order-2">
-          <div className="absolute w-72 h-72 bg-[#61a183]/10 rounded-full blur-3xl"></div>
-          <img
+        {/* Lado Direito: Visual (Escondido no mobile para focar no form) */}
+        <div className="hidden md:flex w-[45%] bg-emerald-50 items-center justify-center p-12 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/50 to-emerald-200/20" />
+          <motion.img
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
             src="/adopt-a-pet-animate.svg"
-            alt="Adopt a Pet"
-            className="relative w-full max-w-sm drop-shadow-2xl"
-            style={{ animation: "float 6s ease-in-out infinite" }}
+            alt="PetCare"
+            className="relative w-full drop-shadow-3xl z-10"
           />
+          {/* Círculo decorativo giratório */}
+          <div className="absolute w-[120%] h-[120%] border border-emerald-200/50 rounded-full animate-[spin_20s_linear_infinite]" />
         </div>
-      </div>
+      </motion.div>
+    </div>
+  );
+}
 
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-15px);
-          }
-        }
-      `}</style>
+// Componente de Input Modernizado
+function InputField({ label, icon, type, placeholder, value, onChange }) {
+  return (
+    <div className="space-y-2">
+      <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1 italic">
+        {label}
+      </label>
+      <div className="relative group">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors">
+          {icon}
+        </div>
+        <input
+          type={type}
+          required
+          value={value}
+          onChange={onChange}
+          className="w-full pl-12 pr-4 py-4 bg-gray-100/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-emerald-500 outline-none transition-all text-gray-900 font-medium placeholder-gray-300"
+          placeholder={placeholder}
+        />
+      </div>
     </div>
   );
 }
