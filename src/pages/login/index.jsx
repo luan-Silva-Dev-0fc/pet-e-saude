@@ -4,6 +4,11 @@ import { toast, ToastContainer } from "react-toastify";
 import { Eye, EyeOff, Mail, Lock, Loader2, HeartPulse } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
+// Firebase e API Imports
+// Subimos dois níveis (../../) para sair de 'login' e 'pages' e entrar em 'lib'
+import { auth } from "../../lib/firebase"; 
+import { signInWithEmailAndPassword } from "firebase/auth";
+
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -11,6 +16,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // --- LOGICA DE ACESSO ---
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
 
@@ -21,36 +27,46 @@ export default function Login() {
 
     setIsLoading(true);
 
-    // --- SIMULAÇÃO DE LOGIN ---
     try {
-      // Simula o tempo de resposta do servidor (1.2 segundos)
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      // 1. Autenticação Real no Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      // Lógica de simulação: aceita qualquer email e a senha "123456"
-      if (password === "123456") {
-        localStorage.setItem("auth", "true");
-        localStorage.setItem("token", "simulated-jwt-token-123");
-        toast.success("Login simulado com sucesso!");
+      // 2. Gera o Token JWT para sua API
+      const token = await user.getIdToken();
+      
+      // 3. Salva no navegador para manter a sessão
+      localStorage.setItem("token", token);
+      localStorage.setItem("auth", "true");
 
-        // Redireciona após o toast
-        setTimeout(() => router.push("/"), 1000);
-      } else {
-        toast.error("E-mail ou senha incorretos (Dica: use 123456)");
-      }
+      toast.success(`Bem-vindo, ${user.email.split('@')[0]}!`);
+      
+      // Redireciona para a Dashboard/Home após 1 segundo
+      setTimeout(() => router.push("/"), 1000);
+
     } catch (error) {
-      toast.error("Erro inesperado na simulação.");
+      console.error("Erro no login:", error.code);
+      
+      // Tratamento de erros amigável
+      if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found") {
+        toast.error("E-mail ou senha incorretos.");
+      } else if (error.code === "auth/too-many-requests") {
+        toast.error("Muitas tentativas. Tente novamente mais tarde.");
+      } else {
+        toast.error("Erro ao entrar. Verifique sua conexão.");
+      }
     } finally {
       setIsLoading(false);
     }
-    // --- FIM DA SIMULAÇÃO ---
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-tr from-[#528d72] via-[#61a183] to-[#a3d5bd] font-sans items-center justify-center p-6">
+    <div className="flex min-h-screen bg-linear-to-tr from-[#528d72] via-[#61a183] to-[#a3d5bd] font-sans items-center justify-center p-6">
       <ToastContainer theme="colored" position="top-right" />
 
       <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2.5rem] overflow-hidden">
-        {/* Coluna do Formulário */}
+        
+        {/* Lado Esquerdo: Formulário */}
         <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center bg-white">
           <div className="mb-10">
             <div className="flex items-center gap-2 mb-3">
@@ -60,11 +76,10 @@ export default function Login() {
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-gray-800 leading-tight">
-              Cuidar de quem nos faz{" "}
-              <span className="text-[#26885a]">feliz.</span>
+              Cuidar de quem nos faz <span className="text-[#26885a]">feliz.</span>
             </h2>
             <p className="text-gray-500 mt-3 font-medium">
-              Acesse sua conta para gerenciar os cuidados do seu melhor amigo.
+              Acesse o painel para cuidar do seu pet.
             </p>
           </div>
 
@@ -82,7 +97,8 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-11 pr-4 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
-                  placeholder="exemplo@email.com"
+                  placeholder="seu@email.com"
+                  required
                 />
               </div>
             </div>
@@ -100,7 +116,8 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-11 pr-12 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#61a183] outline-none transition-all text-gray-900 placeholder-gray-400"
-                  placeholder="Dica: use 123456"
+                  placeholder="Sua senha"
+                  required
                 />
                 <button
                   type="button"
@@ -112,24 +129,15 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex justify-end mt-1">
-              <button
-                type="button"
-                onClick={() => router.push("/recuperar-senha")}
-                className="text-sm font-bold text-[#26885a] hover:text-[#1e6b47] transition-all"
-              >
-                Esqueceu a senha?
-              </button>
-            </div>
-
             <button
+              type="submit"
               disabled={isLoading}
               className="w-full bg-[#26885a] hover:bg-[#1e6b47] text-white font-extrabold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-green-100 flex items-center justify-center gap-3 active:scale-[0.97] disabled:opacity-70"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="animate-spin h-5 w-5" />
-                  <span>Autenticando...</span>
+                  <span>Entrando...</span>
                 </>
               ) : (
                 "Entrar no Sistema"
@@ -139,25 +147,24 @@ export default function Login() {
 
           <div className="mt-10 text-center border-t border-gray-100 pt-6">
             <p className="text-gray-500 font-medium">
-              Novo por aqui?{" "}
+              Não tem conta?{" "}
               <button
                 onClick={() => router.push("/Cadastro")}
                 className="text-[#26885a] font-extrabold hover:underline underline-offset-4"
               >
-                Crie uma conta gratuita
+                Cadastre-se grátis
               </button>
             </p>
           </div>
         </div>
 
-        {/* Coluna da Imagem Lateral */}
+        {/* Lado Direito: Imagem Animada */}
         <div className="hidden md:flex w-1/2 bg-[#f8faf9] items-center justify-center p-12 relative">
           <div className="absolute w-80 h-80 bg-[#61a183]/10 rounded-full blur-3xl"></div>
-
           <img
             src="/veterinary-animate.svg"
-            alt="Ilustração Veterinária"
-            className="relative w-full max-w-sm drop-shadow-2xl animate-float"
+            alt="Veterinary Illustration"
+            className="relative w-full max-w-sm drop-shadow-2xl"
             style={{ animation: "float 6s ease-in-out infinite" }}
           />
         </div>
@@ -165,13 +172,8 @@ export default function Login() {
 
       <style jsx>{`
         @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
         }
       `}</style>
     </div>

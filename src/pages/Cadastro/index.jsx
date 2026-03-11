@@ -3,8 +3,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { motion } from "framer-motion";
-import { User, Mail, Lock, Eye, EyeOff, Loader2, PawPrint, ArrowRight } from "lucide-react";
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  PawPrint,
+  ArrowRight,
+} from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
+
+// Firebase Imports
+import { auth } from "../../lib/firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 export default function PageCadastro() {
   const router = useRouter();
@@ -22,25 +35,65 @@ export default function PageCadastro() {
       return;
     }
 
+    if (password.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Substituído Axios por Fetch Nativo para corrigir o erro da Vercel
-      const response = await fetch("http://localhost:4028/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
+      // 1. Criar usuário no Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      const user = userCredential.user;
 
-      const data = await response.json();
+      // 2. Atualizar o nome no perfil do Firebase
+      await updateProfile(user, { displayName: name });
+
+      // 3. Obter o Token para enviar para sua API
+      const token = await user.getIdToken();
+
+      // 4. Sincronizar com sua API Cloud Function (PRODUÇÃO)
+      const response = await fetch(
+        "https://us-central1-pet-e-saude.cloudfunctions.net/api/usuarios",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            nome: name.split(" ")[0],
+            sobrenome: name.split(" ").slice(1).join(" "),
+            email,
+            uid: user.uid,
+          }),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(data.error || "Erro ao cadastrar.");
+        console.warn(
+          "Conta criada no Auth, mas erro ao sincronizar perfil na API.",
+        );
       }
 
-      toast.success("Conta criada! Redirecionando...");
-      setTimeout(() => router.push("/login"), 2000);
+      toast.success("Conta criada com sucesso!");
+
+      // Salva login local e redireciona
+      localStorage.setItem("token", token);
+      localStorage.setItem("auth", "true");
+
+      setTimeout(() => router.push("/"), 2000);
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
+      if (error.code === "auth/email-already-in-use") {
+        toast.error("Este e-mail já está em uso.");
+      } else {
+        toast.error(error.message || "Erro ao realizar cadastro.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -49,12 +102,12 @@ export default function PageCadastro() {
   return (
     <div className="flex min-h-screen bg-[#f0f4f2] items-center justify-center p-4 md:p-6 font-sans overflow-hidden relative">
       <ToastContainer theme="colored" />
-      
+
       {/* Elementos Decorativos de Fundo */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-200/40 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-green-200/30 rounded-full blur-[120px] pointer-events-none" />
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col md:flex-row w-full max-w-6xl bg-white/80 backdrop-blur-xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] rounded-[3rem] border border-white overflow-hidden z-10"
@@ -62,8 +115,9 @@ export default function PageCadastro() {
         {/* Lado Esquerdo: Formulário */}
         <div className="w-full md:w-[55%] p-8 md:p-16 flex flex-col justify-center">
           <div className="mb-10">
-            <motion.div 
-              initial={{ x: -20 }} animate={{ x: 0 }}
+            <motion.div
+              initial={{ x: -20 }}
+              animate={{ x: 0 }}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest mb-4"
             >
               <PawPrint size={14} /> Nova Conta
@@ -77,37 +131,37 @@ export default function PageCadastro() {
           </div>
 
           <form onSubmit={handleSignup} className="space-y-6">
-            <InputField 
-              label="Nome Completo" 
-              icon={<User size={20} />} 
-              type="text" 
-              placeholder="Como deseja ser chamado?" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
+            <InputField
+              label="Nome Completo"
+              icon={<User size={20} />}
+              type="text"
+              placeholder="Como deseja ser chamado?"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
-            
-            <InputField 
-              label="E-mail" 
-              icon={<Mail size={20} />} 
-              type="email" 
-              placeholder="exemplo@pet.com" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+
+            <InputField
+              label="E-mail"
+              icon={<Mail size={20} />}
+              type="email"
+              placeholder="exemplo@pet.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
 
             <div className="relative group">
-              <InputField 
-                label="Senha" 
-                icon={<Lock size={20} />} 
-                type={showPassword ? "text" : "password"} 
-                placeholder="Mínimo 6 caracteres" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
+              <InputField
+                label="Senha"
+                icon={<Lock size={20} />}
+                type={showPassword ? "text" : "password"}
+                placeholder="Mínimo 6 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-[46px] text-gray-400 hover:text-emerald-600 transition-colors"
+                className="absolute right-4 top-11.5 text-gray-400 hover:text-emerald-600 transition-colors"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -123,22 +177,27 @@ export default function PageCadastro() {
               {isLoading ? (
                 <Loader2 className="animate-spin h-5 w-5 text-emerald-400" />
               ) : (
-                <>Criar Conta <ArrowRight size={20} /></>
+                <>
+                  Criar Conta <ArrowRight size={20} />
+                </>
               )}
             </motion.button>
           </form>
 
           <p className="mt-10 text-center text-gray-500 font-bold">
             Já é de casa?{" "}
-            <button onClick={() => router.push("/login")} className="text-emerald-600 hover:underline">
+            <button
+              onClick={() => router.push("/login")}
+              className="text-emerald-600 hover:underline"
+            >
               Fazer Login
             </button>
           </p>
         </div>
 
-        {/* Lado Direito: Visual (Escondido no mobile para focar no form) */}
+        {/* Lado Direito: Visual */}
         <div className="hidden md:flex w-[45%] bg-emerald-50 items-center justify-center p-12 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/50 to-emerald-200/20" />
+          <div className="absolute inset-0 bg-linear-to-br from-emerald-100/50 to-emerald-200/20" />
           <motion.img
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -147,7 +206,6 @@ export default function PageCadastro() {
             alt="PetCare"
             className="relative w-full drop-shadow-3xl z-10"
           />
-          {/* Círculo decorativo giratório */}
           <div className="absolute w-[120%] h-[120%] border border-emerald-200/50 rounded-full animate-[spin_20s_linear_infinite]" />
         </div>
       </motion.div>
@@ -155,7 +213,6 @@ export default function PageCadastro() {
   );
 }
 
-// Componente de Input Modernizado
 function InputField({ label, icon, type, placeholder, value, onChange }) {
   return (
     <div className="space-y-2">
