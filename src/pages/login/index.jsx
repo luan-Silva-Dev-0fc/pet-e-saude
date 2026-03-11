@@ -4,9 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { Eye, EyeOff, Mail, Lock, Loader2, HeartPulse } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
-// Firebase e API Imports
-// Subimos dois níveis (../../) para sair de 'login' e 'pages' e entrar em 'lib'
-import { auth } from "../../lib/firebase"; 
+import { auth } from "../../lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function Login() {
@@ -16,7 +14,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- LOGICA DE ACESSO ---
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
 
@@ -28,27 +25,28 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // 1. Autenticação Real no Firebase Auth
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
       const user = userCredential.user;
 
-      // 2. Gera o Token JWT para sua API
       const token = await user.getIdToken();
-      
-      // 3. Salva no navegador para manter a sessão
+
       localStorage.setItem("token", token);
       localStorage.setItem("auth", "true");
 
-      toast.success(`Bem-vindo, ${user.email.split('@')[0]}!`);
-      
-      // Redireciona para a Dashboard/Home após 1 segundo
-      setTimeout(() => router.push("/"), 1000);
+      toast.success(`Bem-vindo, ${user.email.split("@")[0]}!`);
 
+      setTimeout(() => router.push("/"), 1000);
     } catch (error) {
       console.error("Erro no login:", error.code);
-      
-      // Tratamento de erros amigável
-      if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found") {
+
+      if (
+        error.code === "auth/invalid-credential" ||
+        error.code === "auth/user-not-found"
+      ) {
         toast.error("E-mail ou senha incorretos.");
       } else if (error.code === "auth/too-many-requests") {
         toast.error("Muitas tentativas. Tente novamente mais tarde.");
@@ -65,8 +63,6 @@ export default function Login() {
       <ToastContainer theme="colored" position="top-right" />
 
       <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2.5rem] overflow-hidden">
-        
-        {/* Lado Esquerdo: Formulário */}
         <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center bg-white">
           <div className="mb-10">
             <div className="flex items-center gap-2 mb-3">
@@ -76,7 +72,8 @@ export default function Login() {
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-gray-800 leading-tight">
-              Cuidar de quem nos faz <span className="text-[#26885a]">feliz.</span>
+              Cuidar de quem nos faz{" "}
+              <span className="text-[#26885a]">feliz.</span>
             </h2>
             <p className="text-gray-500 mt-3 font-medium">
               Acesse o painel para cuidar do seu pet.
@@ -158,7 +155,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Lado Direito: Imagem Animada */}
         <div className="hidden md:flex w-1/2 bg-[#f8faf9] items-center justify-center p-12 relative">
           <div className="absolute w-80 h-80 bg-[#61a183]/10 rounded-full blur-3xl"></div>
           <img
@@ -172,8 +168,13 @@ export default function Login() {
 
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
         }
       `}</style>
     </div>

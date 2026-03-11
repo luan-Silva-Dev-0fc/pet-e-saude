@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
-// Firebase Imports
+
 import { auth } from "../../lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
